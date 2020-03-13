@@ -44,22 +44,30 @@ class ItemGroupsCommand : BaseCommand() {
     @field:Dependency
     lateinit var mythicDrops: MythicDrops
 
-    @Description("Prints the item groups that the plugin is aware of. If given an item group name, prints the contents of the group.")
+    @Description(
+        "Prints the item groups that the plugin is aware of." +
+            "If given an item group name, prints the contents of the group."
+    )
     @CommandCompletion("@itemGroups")
     @Subcommand("itemgroups")
     @CommandPermission("mythicdrops.command.itemgroups")
-    fun itemGroupsCommand(sender: CommandSender, @Default("*") itemGroup: ItemGroup?) {
+    fun printItemGroupsCommand(sender: CommandSender, @Default("*") itemGroup: ItemGroup?) {
         if (itemGroup == null) {
             sender.sendMythicMessage(
-                mythicDrops.settingsManager.languageSettings.command.itemGroupList,
+                mythicDrops.settingsManager.languageSettings.command.itemGroups.list,
                 "%itemgroups%" to mythicDrops.itemGroupManager.get().joinToString(", ") { it.name }
             )
             return
         }
         sender.sendMythicMessage(
-            mythicDrops.settingsManager.languageSettings.command.itemGroupMaterialsList,
+            mythicDrops.settingsManager.languageSettings.command.itemGroups.materialsList,
             "%itemgroup%" to itemGroup.name,
             "%materials%" to itemGroup.materials.joinToString(", ") { it.name }
+        )
+        sender.sendMythicMessage(
+            mythicDrops.settingsManager.languageSettings.command.itemGroups.priority,
+            "%itemgroup%" to itemGroup.name,
+            "%priority%" to itemGroup.priority.toString()
         )
     }
 }

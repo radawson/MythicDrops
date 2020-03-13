@@ -42,6 +42,7 @@ import com.tealcube.minecraft.bukkit.mythicdrops.api.socketing.combiners.SocketG
 import com.tealcube.minecraft.bukkit.mythicdrops.api.tiers.Tier;
 import com.tealcube.minecraft.bukkit.mythicdrops.api.tiers.TierManager;
 import com.tealcube.minecraft.bukkit.mythicdrops.aura.AuraRunnable;
+import com.tealcube.minecraft.bukkit.mythicdrops.config.migration.ConfigMigrator;
 import com.tealcube.minecraft.bukkit.mythicdrops.config.migration.JarConfigMigrator;
 import com.tealcube.minecraft.bukkit.mythicdrops.crafting.CraftingListener;
 import com.tealcube.minecraft.bukkit.mythicdrops.errors.MythicLoadingErrorManager;
@@ -71,6 +72,7 @@ import com.tealcube.minecraft.bukkit.mythicdrops.socketing.cache.SocketGemCacheL
 import com.tealcube.minecraft.bukkit.mythicdrops.socketing.combiners.MythicSocketGemCombiner;
 import com.tealcube.minecraft.bukkit.mythicdrops.socketing.combiners.MythicSocketGemCombinerGuiFactory;
 import com.tealcube.minecraft.bukkit.mythicdrops.socketing.combiners.MythicSocketGemCombinerManager;
+import com.tealcube.minecraft.bukkit.mythicdrops.spawning.ItemDroppingListener;
 import com.tealcube.minecraft.bukkit.mythicdrops.spawning.ItemSpawningListener;
 import com.tealcube.minecraft.bukkit.mythicdrops.tiers.MythicTier;
 import com.tealcube.minecraft.bukkit.mythicdrops.tiers.MythicTierManager;
@@ -225,6 +227,10 @@ import org.jetbrains.annotations.NotNull;
       defaultValue = PermissionDefault.OP,
       desc = "Allows player to use \"/mythicdrops tiers\" command."),
   @Permission(
+      name = "mythicdrops.command.itemgroups",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops itemgroups\" command."),
+  @Permission(
       name = "mythicdrops.command.modify.name",
       defaultValue = PermissionDefault.OP,
       desc = "Allows player to use \"/mythicdrops modify name\" command."),
@@ -291,6 +297,10 @@ import org.jetbrains.annotations.NotNull;
       name = "mythicdrops.command.combiners.remove",
       defaultValue = PermissionDefault.OP,
       desc = "Allows player to use \"/mythicdrops combiners remove\" command."),
+  @Permission(
+      name = "mythicdrops.command.combiners.open",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops combiners open\" command."),
   @Permission(
       name = "mythicdrops.command.combiners.*",
       defaultValue = PermissionDefault.OP,
@@ -538,12 +548,14 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     LOGGER.fine("Loading item groups");
     itemGroupManager.clear();
     for (String key : itemGroupYAML.getKeys(false)) {
-      if (itemGroupYAML.isConfigurationSection(key)
-          || key.equals("version")
-          || !itemGroupYAML.isList(key)) {
+      if (!itemGroupYAML.isConfigurationSection(key)) {
         continue;
       }
-      itemGroupManager.add(MythicItemGroup.fromConfigurationSection(itemGroupYAML, key));
+      ConfigurationSection itemGroupCs = itemGroupYAML.getConfigurationSection(key);
+      if (itemGroupCs == null) {
+        continue;
+      }
+      itemGroupManager.add(MythicItemGroup.fromConfigurationSection(itemGroupCs, key));
     }
     LOGGER.fine("Loaded item groups: " + itemGroupManager.get().size());
   }
@@ -665,11 +677,12 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
 
   @Override
   public void reloadNames() {
-    NameMap.getInstance().clear();
+    NameMap.INSTANCE.clear();
     loadPrefixes();
     loadSuffixes();
     loadLore();
     loadMobNames();
+    LOGGER.fine("Loaded name keys: " + NameMap.INSTANCE.getJoinedKeys());
   }
 
   @Override
@@ -960,8 +973,12 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
       return;
     }
 
-    jarConfigMigrator = new JarConfigMigrator(getFile(), getDataFolder());
-    LOGGER.fine("Found migrations: " + jarConfigMigrator.getConfigMigrationContents().size());
+    jarConfigMigrator =
+        new JarConfigMigrator(
+            getFile(),
+            getDataFolder(),
+            ConfigMigrator.Companion.getDefaultMoshi(),
+            settingsManager.getStartupSettings().isBackupOnConfigMigrate());
 
     LOGGER.fine("Loading configuration files...");
     reloadConfigurationFiles();
@@ -1007,6 +1024,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     if (settingsManager.getConfigSettings().getComponents().isCreatureSpawningEnabled()) {
       getLogger().info("Mobs spawning with equipment enabled");
       LOGGER.info("Mobs spawning with equipment enabled");
+      Bukkit.getPluginManager().registerEvents(new ItemDroppingListener(this), this);
       Bukkit.getPluginManager().registerEvents(new ItemSpawningListener(this), this);
     }
     if (settingsManager.getConfigSettings().getComponents().isRepairingEnabled()) {
@@ -1037,7 +1055,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
       Bukkit.getPluginManager()
           .registerEvents(
               new IdentificationInventoryDragListener(
-                  relationManager, settingsManager, tierManager),
+                  itemGroupManager, relationManager, settingsManager, tierManager),
               this);
     }
 
@@ -1057,6 +1075,13 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
       Logger.getLogger("io.pixeloutlaw.minecraft.spigot").setLevel(Level.INFO);
       Logger.getLogger("po.io.pixeloutlaw.minecraft.spigot").setLevel(Level.INFO);
     }
+    settingsManager
+        .getStartupSettings()
+        .getLoggingLevels()
+        .forEach(
+            (logger, level) -> {
+              Logger.getLogger(logger).setLevel(level);
+            });
   }
 
   private void writeTierFiles(File tiersFolder) {
@@ -1152,7 +1177,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     }
 
     LOGGER.info("Loaded mob names: " + numOfLoadedMobNames);
-    NameMap.getInstance().putAll(mobNames);
+    NameMap.INSTANCE.putAll(mobNames);
   }
 
   private void loadLore() {
@@ -1223,7 +1248,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     }
 
     LOGGER.info("Loaded lore: " + numOfLoadedLore);
-    NameMap.getInstance().putAll(lore);
+    NameMap.INSTANCE.putAll(lore);
   }
 
   private void loadSuffixes() {
@@ -1298,7 +1323,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     }
 
     LOGGER.info("Loaded suffixes: " + numOfLoadedSuffixes);
-    NameMap.getInstance().putAll(suffixes);
+    NameMap.INSTANCE.putAll(suffixes);
   }
 
   private void loadPrefixes() {
@@ -1373,6 +1398,6 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     }
 
     LOGGER.info("Loaded prefixes: " + numOfLoadedPrefixes);
-    NameMap.getInstance().putAll(prefixes);
+    NameMap.INSTANCE.putAll(prefixes);
   }
 }

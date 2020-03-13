@@ -1,7 +1,7 @@
 /*
  * This file is part of MythicDrops, licensed under the MIT License.
  *
- * Copyright (C) 2019 Richard Harrah
+ * Copyright (C) 2020 Richard Harrah
  *
  * Permission is hereby granted, free of charge,
  * to any person obtaining a copy of this software and associated documentation files (the "Software"),
@@ -19,12 +19,15 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.tealcube.minecraft.bukkit.mythicdrops
+package com.tealcube.minecraft.bukkit.mythicdrops.api.settings.language.command
 
-import org.bukkit.enchantments.Enchantment
-import org.bukkit.inventory.ItemStack
+/**
+ * Represents the `command.item-groups` section in the language.yml. Names map practically one-to-one.
+ */
+interface ItemGroupMessages {
+    val list: String
 
-fun ItemStack.setUnsafeEnchantments(enchantments: Map<Enchantment, Int>) {
-    this.enchantments.keys.toSet().forEach { removeEnchantment(it) }
-    addUnsafeEnchantments(enchantments)
+    val materialsList: String
+
+    val priority: String
 }

@@ -64,7 +64,9 @@ object ItemBuildingUtil {
             val maximumLevel = max(mythicEnchantment.maximumLevel, enchantment.maxLevel)
             when {
                 !tier.isSafeBaseEnchantments -> enchantment to (minimumLevel..maximumLevel).random()
-                tier.isAllowHighBaseEnchantments -> enchantment to (minimumLevel..mythicEnchantment.maximumLevel).random()
+                tier.isAllowHighBaseEnchantments -> {
+                    enchantment to (minimumLevel..mythicEnchantment.maximumLevel).random()
+                }
                 else -> enchantment to getAcceptableEnchantmentLevel(
                     enchantment,
                     (minimumLevel..maximumLevel).random()
@@ -80,9 +82,6 @@ object ItemBuildingUtil {
         val bonusEnchantmentsToAdd = (tier.minimumBonusEnchantments..tier.maximumBonusEnchantments).random()
         var tierBonusEnchantments =
             getSafeEnchantments(tier.isSafeBonusEnchantments, tier.bonusEnchantments, itemStack)
-        if (tierBonusEnchantments.isEmpty()) {
-            return emptyMap()
-        }
         val bonusEnchantments = mutableMapOf<Enchantment, Int>()
         repeat(bonusEnchantmentsToAdd) {
             if (tierBonusEnchantments.isEmpty()) {
@@ -108,7 +107,7 @@ object ItemBuildingUtil {
             }
             bonusEnchantments[enchantment] = trimmedLevel
         }
-        return bonusEnchantments
+        return bonusEnchantments.toMap()
     }
 
     private fun getAcceptableEnchantmentLevel(enchantment: Enchantment, level: Int): Int {
