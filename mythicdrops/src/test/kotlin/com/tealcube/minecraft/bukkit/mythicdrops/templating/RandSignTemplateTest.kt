@@ -36,7 +36,7 @@ class RandSignTemplateTest {
                 returnedMinuses++
             }
         }
-        assertThat(returnedMinuses).isGreaterThan(35)
-        assertThat(returnedPluses).isGreaterThan(35)
+        assertThat(returnedMinuses).isGreaterThanOrEqualTo(35)
+        assertThat(returnedPluses).isGreaterThanOrEqualTo(35)
     }
 }

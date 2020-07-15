@@ -22,10 +22,12 @@
 package com.tealcube.minecraft.bukkit.mythicdrops.utils
 
 import org.assertj.core.api.Assertions.assertThat
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Cow
 import org.bukkit.entity.EnderDragon
 import org.bukkit.entity.Ghast
 import org.bukkit.entity.MagmaCube
+import org.bukkit.entity.Ravager
 import org.bukkit.entity.Slime
 import org.bukkit.entity.Wither
 import org.bukkit.entity.Zombie
@@ -36,7 +38,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 class CreatureSpawnEventUtilTest {
-    val spawnReason = CreatureSpawnEvent.SpawnReason.DEFAULT
+    private val spawnReason = CreatureSpawnEvent.SpawnReason.DEFAULT
     @Mock
     lateinit var slime: Slime
     @Mock
@@ -51,6 +53,10 @@ class CreatureSpawnEventUtilTest {
     lateinit var cow: Cow
     @Mock
     lateinit var wither: Wither
+    @Mock
+    lateinit var ravager: Ravager
+    @Mock
+    lateinit var armorStand: ArmorStand
 
     @BeforeEach
     fun setUp() {
@@ -107,8 +113,22 @@ class CreatureSpawnEventUtilTest {
     }
 
     @Test
-    fun doesShouldCancelDropsBasedOnCreatureSpawnEventReturnTrueForCow() {
+    fun `does should cancel drops based on creature spawn event return false for Ravager`() {
+        val event = CreatureSpawnEvent(ravager, spawnReason)
+
+        assertThat(CreatureSpawnEventUtil.shouldCancelDropsBasedOnCreatureSpawnEvent(event)).isFalse()
+    }
+
+    @Test
+    fun doesShouldCancelDropsBasedOnCreatureSpawnEventReturnFalseForCow() {
         val event = CreatureSpawnEvent(cow, spawnReason)
+
+        assertThat(CreatureSpawnEventUtil.shouldCancelDropsBasedOnCreatureSpawnEvent(event)).isFalse()
+    }
+
+    @Test
+    fun `does shouldCancelDropsBasedOnCreatureSpawnEvent return true for ArmorStand`() {
+        val event = CreatureSpawnEvent(armorStand, spawnReason)
 
         assertThat(CreatureSpawnEventUtil.shouldCancelDropsBasedOnCreatureSpawnEvent(event)).isTrue()
     }

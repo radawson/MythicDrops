@@ -35,7 +35,7 @@ import com.tealcube.minecraft.bukkit.mythicdrops.logging.JulLoggerFactory
 import com.tealcube.minecraft.bukkit.mythicdrops.names.NameMap
 import com.tealcube.minecraft.bukkit.mythicdrops.socketing.SocketItem
 import com.tealcube.minecraft.bukkit.mythicdrops.utils.CreatureSpawnEventUtil
-import com.tealcube.minecraft.bukkit.mythicdrops.utils.EntityUtil
+import com.tealcube.minecraft.bukkit.mythicdrops.utils.EquipmentUtils
 import com.tealcube.minecraft.bukkit.mythicdrops.utils.GemUtil
 import com.tealcube.minecraft.bukkit.mythicdrops.utils.ItemUtil
 import com.tealcube.minecraft.bukkit.mythicdrops.utils.TierUtil
@@ -56,12 +56,14 @@ import org.bukkit.inventory.ItemStack
 class ItemSpawningListener(private val mythicDrops: MythicDrops) : Listener {
     companion object {
         private const val WORLD_MAX_HEIGHT = 255
+        private const val ONE_HUNDRED_PERCENT = 1.0
+        private const val ONE_HUNDRED_TEN_PERCENT = 1.1
         private val logger = JulLoggerFactory.getLogger(ItemSpawningListener::class)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onCreatureSpawnEventLowest(creatureSpawnEvent: CreatureSpawnEvent) {
-        if (isShouldNotSpawn(creatureSpawnEvent)) return
+        if (shouldNotHandleSpawnEvent(creatureSpawnEvent)) return
         if (mythicDrops.settingsManager.configSettings.options.isGiveAllMobsNames) {
             giveLivingEntityName(creatureSpawnEvent.entity)
         }
@@ -86,7 +88,7 @@ class ItemSpawningListener(private val mythicDrops: MythicDrops) : Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     fun onCreatureSpawnEventLow(creatureSpawnEvent: CreatureSpawnEvent) {
-        if (isShouldNotSpawn(creatureSpawnEvent)) return
+        if (shouldNotHandleSpawnEvent(creatureSpawnEvent)) return
 
         val itemChance = mythicDrops.settingsManager.configSettings.drops.itemChance
         val creatureSpawningMultiplier = mythicDrops
@@ -119,7 +121,13 @@ class ItemSpawningListener(private val mythicDrops: MythicDrops) : Listener {
 
         var itemStack: ItemStack? = null
         var tier: Tier? = null
-        var dropChance = 1.0
+        // due to the way that spigot/minecraft handles drop chances, it won't drop items with a 100% drop chance
+        // if a player isn't the one that killed it.
+        var dropChance = if (mythicDrops.settingsManager.configSettings.options.isRequirePlayerKillForDrops) {
+            ONE_HUNDRED_PERCENT
+        } else {
+            ONE_HUNDRED_TEN_PERCENT
+        }
 
         // this is here to maintain previous behavior
         if (tieredItemRoll <= tieredItemChanceMultiplied && WorldGuardAdapters.instance.isFlagAllowAtLocation(
@@ -143,7 +151,7 @@ class ItemSpawningListener(private val mythicDrops: MythicDrops) : Listener {
         ) {
             mythicDrops.customItemManager.randomByWeight()?.let {
                 val customItemGenerationEvent =
-                    CustomItemGenerationEvent(it)
+                    CustomItemGenerationEvent(it, it.toItemStack(mythicDrops.customEnchantmentRegistry))
                 Bukkit.getPluginManager().callEvent(customItemGenerationEvent)
                 if (!customItemGenerationEvent.isCancelled) {
                     itemStack = customItemGenerationEvent.result
@@ -194,7 +202,7 @@ class ItemSpawningListener(private val mythicDrops: MythicDrops) : Listener {
         val ese = EntitySpawningEvent(creatureSpawnEvent.entity)
         Bukkit.getPluginManager().callEvent(ese)
 
-        EntityUtil.equipEntity(creatureSpawnEvent.entity, itemStack, dropChance)
+        EquipmentUtils.equipEntity(creatureSpawnEvent.entity, itemStack, dropChance)
 
         if (itemStack != null) {
             giveLivingEntityName(creatureSpawnEvent.entity, tier)
@@ -273,7 +281,7 @@ class ItemSpawningListener(private val mythicDrops: MythicDrops) : Listener {
     }
 
     // returns true if we should NOT spawn based on event criteria
-    private fun isShouldNotSpawn(event: CreatureSpawnEvent): Boolean {
+    private fun shouldNotHandleSpawnEvent(event: CreatureSpawnEvent): Boolean {
         return when {
             CreatureSpawnEventUtil.shouldCancelDropsBasedOnCreatureSpawnEvent(event) -> true
             !mythicDrops

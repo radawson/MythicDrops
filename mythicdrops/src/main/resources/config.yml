@@ -1,4 +1,4 @@
-version: 7.2.0
+version: 7.4.0
 options:
   ## Should monsters who receive drops be given
   ## random names? Pulls from the resources/mobnames
@@ -50,12 +50,22 @@ options:
   use-tier-color-for-socket-name: true
   ## If mobs need to be killed by a player in order for their items to
   ## drop. This is true by default as it helps nullify mob traps. If
-  ## you want mob traps to work, set this to false.
+  ## you want mob traps to work, set this to false. This only works with
+  ## display-mob-equipment set to false.
   require-player-kill-for-drops: true
   ## Set this to true if you do not want to be able to roll multiple
   ## bonus enchantments with the same enchantment. This will lead to
   ## scenarios where you may have low numbers of enchantments on items.
   only-roll-bonus-enchantments-once: false
+  ## Set this to true if you do not want to be able to roll multiple
+  ## bonus attributes with the same attribute. This will lead to
+  ## scenarios where you may have low numbers of attributes on items.
+  only-roll-bonus-attributes-once: false
+  ## Allow items to have their repair costs removed by a grindstone?
+  ## This only works for Minecraft 1.14+. Set this to false if you
+  ## don't want repair costs removed, as that will allow players to
+  ## modify their MD items.
+  allow-items-to-have-repair-cost-removed-by-grindstone: false
 multiworld:
   ## Include any worlds where you want to have MythicDrops
   ## create drops here.

@@ -3,28 +3,29 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     kotlin("jvm")
     kotlin("kapt")
-    id("com.github.johnrengelman.shadow") version Versions.com_github_johnrengelman_shadow_gradle_plugin
-    id("io.pixeloutlaw.gradle.buildconfigkt") version Versions.io_pixeloutlaw_gradle_buildconfigkt_gradle_plugin
+    id("com.github.johnrengelman.shadow") version "6.0.0"
+    id("io.pixeloutlaw.gradle.buildconfigkt") version "1.0.5"
 }
 
 description = "MythicDrops"
 
 dependencies {
-    compileOnly(Libs.spigot_api)
+    compileOnly("org.spigotmc:spigot-api:_")
 
-    implementation(Libs.kotlin_stdlib_jdk8)
-    implementation(Libs.config)
-    implementation(Libs.config_migrator)
-    implementation(Libs.fanciful)
-    implementation(Libs.hilt)
-    implementation(Libs.commons_text)
-    implementation(Libs.bstats_bukkit)
-    implementation(Libs.plugin_yml_annotations)
-    implementation(Libs.acf_paper)
-    implementation(Libs.adapter_lib)
+    api("io.pixeloutlaw.spigot-commons:config:_")
+    api("io.pixeloutlaw.minecraft.spigot:config-migrator:_")
+    api("io.pixeloutlaw.spigot-commons:hilt:_")
+    api("org.apache.commons:commons-text:_")
+    api("org.bstats:bstats-bukkit:_")
+    api("io.pixeloutlaw.minecraft.spigot:plugin-yml-annotations:_")
+    api("co.aikar:acf-paper:_")
+    api("io.pixeloutlaw.worldguard:adapter-lib:_")
+    api("io.papermc:paperlib:_")
 
-    kapt(Libs.plugin_yml_processor)
-    kapt(Libs.moshi_kotlin_codegen)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:_")
+
+    kapt("io.pixeloutlaw.minecraft.spigot:plugin-yml-processor:_")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:_")
 }
 
 java {
@@ -44,6 +45,7 @@ tasks.create("assembleDist", Zip::class.java) {
         exclude("plugin.yml")
         include("resources/**/*")
         include("tiers/*.yml")
+        include("variables.txt")
         into("MythicDrops")
     }
 }

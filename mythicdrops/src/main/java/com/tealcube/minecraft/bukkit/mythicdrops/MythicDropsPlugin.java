@@ -21,8 +21,8 @@
  */
 package com.tealcube.minecraft.bukkit.mythicdrops;
 
-import com.tealcube.minecraft.bukkit.mythicdrops.anvil.AnvilListener;
 import com.tealcube.minecraft.bukkit.mythicdrops.api.MythicDrops;
+import com.tealcube.minecraft.bukkit.mythicdrops.api.enchantments.CustomEnchantmentRegistry;
 import com.tealcube.minecraft.bukkit.mythicdrops.api.errors.LoadingErrorManager;
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.CustomItem;
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.CustomItemManager;
@@ -45,8 +45,13 @@ import com.tealcube.minecraft.bukkit.mythicdrops.aura.AuraRunnable;
 import com.tealcube.minecraft.bukkit.mythicdrops.config.migration.ConfigMigrator;
 import com.tealcube.minecraft.bukkit.mythicdrops.config.migration.JarConfigMigrator;
 import com.tealcube.minecraft.bukkit.mythicdrops.crafting.CraftingListener;
+import com.tealcube.minecraft.bukkit.mythicdrops.debug.DebugListener;
+import com.tealcube.minecraft.bukkit.mythicdrops.debug.MythicDebugManager;
+import com.tealcube.minecraft.bukkit.mythicdrops.enchantments.MythicCustomEnchantmentRegistry;
 import com.tealcube.minecraft.bukkit.mythicdrops.errors.MythicLoadingErrorManager;
 import com.tealcube.minecraft.bukkit.mythicdrops.identification.IdentificationInventoryDragListener;
+import com.tealcube.minecraft.bukkit.mythicdrops.inventories.AnvilListener;
+import com.tealcube.minecraft.bukkit.mythicdrops.inventories.GrindstoneListener;
 import com.tealcube.minecraft.bukkit.mythicdrops.io.SmartTextFile;
 import com.tealcube.minecraft.bukkit.mythicdrops.items.MythicCustomItem;
 import com.tealcube.minecraft.bukkit.mythicdrops.items.MythicCustomItemManager;
@@ -78,8 +83,10 @@ import com.tealcube.minecraft.bukkit.mythicdrops.tiers.MythicTier;
 import com.tealcube.minecraft.bukkit.mythicdrops.tiers.MythicTierManager;
 import com.tealcube.minecraft.bukkit.mythicdrops.utils.EnchantmentUtil;
 import com.tealcube.minecraft.bukkit.mythicdrops.utils.FileUtil;
+import com.tealcube.minecraft.bukkit.mythicdrops.utils.MinecraftVersionUtil;
 import com.tealcube.minecraft.bukkit.mythicdrops.worldguard.WorldGuardFlags;
 import com.tealcube.minecraft.spigot.worldguard.adapters.lib.WorldGuardAdapters;
+import io.papermc.lib.PaperLib;
 import io.pixeloutlaw.minecraft.spigot.config.SmartYamlConfiguration;
 import io.pixeloutlaw.mythicdrops.mythicdrops.BuildConfig;
 import java.io.File;
@@ -137,35 +144,80 @@ import org.jetbrains.annotations.NotNull;
       defaultValue = PermissionDefault.TRUE,
       desc = "Allows a player to repair items."),
   @Permission(
-      name = "mythicdrops.command.spawn.custom",
+      name = "mythicdrops.command.combiners.list",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops spawn custom\" command."),
+      desc = "Allows player to use \"/mythicdrops combiners list\" command."),
   @Permission(
-      name = "mythicdrops.command.spawn.gem",
+      name = "mythicdrops.command.combiners.add",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops spawn gem\" command."),
+      desc = "Allows player to use \"/mythicdrops combiners add\" command."),
   @Permission(
-      name = "mythicdrops.command.spawn.tier",
+      name = "mythicdrops.command.combiners.remove",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops spawn tier\" command."),
+      desc = "Allows player to use \"/mythicdrops combiners remove\" command."),
   @Permission(
-      name = "mythicdrops.command.spawn.tome",
+      name = "mythicdrops.command.combiners.open",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops spawn tome\" command."),
+      desc = "Allows player to use \"/mythicdrops combiners open\" command."),
   @Permission(
-      name = "mythicdrops.command.spawn.unidentified",
+      name = "mythicdrops.command.combiners.*",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops spawn unidentified\" command."),
-  @Permission(
-      name = "mythicdrops.command.spawn.*",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use all \"/mythicdrops spawn\" commands.",
+      desc = "Allows player to use all \"/mythicdrops combiners\" commands.",
       children = {
-        @ChildPermission(name = "mythicdrops.command.spawn.custom"),
-        @ChildPermission(name = "mythicdrops.command.spawn.gem"),
-        @ChildPermission(name = "mythicdrops.command.spawn.tier"),
-        @ChildPermission(name = "mythicdrops.command.spawn.tome"),
-        @ChildPermission(name = "mythicdrops.command.spawn.unidentified")
+        @ChildPermission(name = "mythicdrops.command.combiners.list"),
+        @ChildPermission(name = "mythicdrops.command.combiners.add"),
+        @ChildPermission(name = "mythicdrops.command.combiners.remove")
+      }),
+  @Permission(
+      name = "mythicdrops.command.customcreate",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops customcreate\" command."),
+  @Permission(
+      name = "mythicdrops.command.customitems",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops customitems\" command."),
+  @Permission(
+      name = "mythicdrops.command.debug",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops debug\" command."),
+  @Permission(
+      name = "mythicdrops.command.errors",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops errors\" command."),
+  @Permission(
+      name = "mythicdrops.command.toggledebug",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops toggledebug\" command."),
+  @Permission(
+      name = "mythicdrops.command.drop.custom",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops drop custom\" command."),
+  @Permission(
+      name = "mythicdrops.command.drop.gem",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops drop gem\" command."),
+  @Permission(
+      name = "mythicdrops.command.drop.tier",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops drop tier\" command."),
+  @Permission(
+      name = "mythicdrops.command.drop.tome",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops drop tome\" command."),
+  @Permission(
+      name = "mythicdrops.command.drop.unidentified",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops drop unidentified\" command."),
+  @Permission(
+      name = "mythicdrops.command.drop.*",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use all \"/mythicdrops drop\" commands.",
+      children = {
+        @ChildPermission(name = "mythicdrops.command.drop.custom"),
+        @ChildPermission(name = "mythicdrops.command.drop.gem"),
+        @ChildPermission(name = "mythicdrops.command.drop.tier"),
+        @ChildPermission(name = "mythicdrops.command.drop.tome"),
+        @ChildPermission(name = "mythicdrops.command.drop.unidentified")
       }),
   @Permission(
       name = "mythicdrops.command.give.custom",
@@ -198,34 +250,6 @@ import org.jetbrains.annotations.NotNull;
         @ChildPermission(name = "mythicdrops.command.give.tome"),
         @ChildPermission(name = "mythicdrops.command.give.unidentified")
       }),
-  @Permission(
-      name = "mythicdrops.command.load",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to reload configuration files."),
-  @Permission(
-      name = "mythicdrops.command.customcreate",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops customcreate\" command."),
-  @Permission(
-      name = "mythicdrops.command.customitems",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops customitems\" command."),
-  @Permission(
-      name = "mythicdrops.command.socketgems",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops socketgems\" command."),
-  @Permission(
-      name = "mythicdrops.command.debug",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops debug\" command."),
-  @Permission(
-      name = "mythicdrops.command.errors",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops errors\" command."),
-  @Permission(
-      name = "mythicdrops.command.tiers",
-      defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops tiers\" command."),
   @Permission(
       name = "mythicdrops.command.itemgroups",
       defaultValue = PermissionDefault.OP,
@@ -286,53 +310,67 @@ import org.jetbrains.annotations.NotNull;
         @ChildPermission(name = "mythicdrops.command.modify.enchantment.*")
       }),
   @Permission(
-      name = "mythicdrops.command.combiners.list",
+      name = "mythicdrops.command.load",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops combiners list\" command."),
+      desc = "Allows player to reload configuration files."),
   @Permission(
-      name = "mythicdrops.command.combiners.add",
+      name = "mythicdrops.command.socketgems",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops combiners add\" command."),
+      desc = "Allows player to use \"/mythicdrops socketgems\" command."),
   @Permission(
-      name = "mythicdrops.command.combiners.remove",
+      name = "mythicdrops.command.spawn.custom",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops combiners remove\" command."),
+      desc = "Allows player to use \"/mythicdrops spawn custom\" command."),
   @Permission(
-      name = "mythicdrops.command.combiners.open",
+      name = "mythicdrops.command.spawn.gem",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops combiners open\" command."),
+      desc = "Allows player to use \"/mythicdrops spawn gem\" command."),
   @Permission(
-      name = "mythicdrops.command.combiners.*",
+      name = "mythicdrops.command.spawn.tier",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use all \"/mythicdrops combiners\" commands.",
+      desc = "Allows player to use \"/mythicdrops spawn tier\" command."),
+  @Permission(
+      name = "mythicdrops.command.spawn.tome",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops spawn tome\" command."),
+  @Permission(
+      name = "mythicdrops.command.spawn.unidentified",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use \"/mythicdrops spawn unidentified\" command."),
+  @Permission(
+      name = "mythicdrops.command.spawn.*",
+      defaultValue = PermissionDefault.OP,
+      desc = "Allows player to use all \"/mythicdrops spawn\" commands.",
       children = {
-        @ChildPermission(name = "mythicdrops.command.combiners.list"),
-        @ChildPermission(name = "mythicdrops.command.combiners.add"),
-        @ChildPermission(name = "mythicdrops.command.combiners.remove")
+        @ChildPermission(name = "mythicdrops.command.spawn.custom"),
+        @ChildPermission(name = "mythicdrops.command.spawn.gem"),
+        @ChildPermission(name = "mythicdrops.command.spawn.tier"),
+        @ChildPermission(name = "mythicdrops.command.spawn.tome"),
+        @ChildPermission(name = "mythicdrops.command.spawn.unidentified")
       }),
   @Permission(
-      name = "mythicdrops.command.customcreate",
+      name = "mythicdrops.command.tiers",
       defaultValue = PermissionDefault.OP,
-      desc = "Allows player to use \"/mythicdrops customcreate\" command."),
+      desc = "Allows player to use \"/mythicdrops tiers\" command."),
   @Permission(
       name = "mythicdrops.command.*",
       defaultValue = PermissionDefault.OP,
       desc = "Allows player to use all commands.",
       children = {
-        @ChildPermission(name = "mythicdrops.command.spawn"),
-        @ChildPermission(name = "mythicdrops.command.spawn.wildcard"),
-        @ChildPermission(name = "mythicdrops.command.give"),
-        @ChildPermission(name = "mythicdrops.command.give.wildcard"),
-        @ChildPermission(name = "mythicdrops.command.load"),
-        @ChildPermission(name = "mythicdrops.command.unidentified"),
-        @ChildPermission(name = "mythicdrops.command.identitytome"),
+        @ChildPermission(name = "mythicdrops.command.combiners.*"),
         @ChildPermission(name = "mythicdrops.command.customcreate"),
         @ChildPermission(name = "mythicdrops.command.customitems"),
-        @ChildPermission(name = "mythicdrops.command.socketgems"),
-        @ChildPermission(name = "mythicdrops.command.tiers"),
+        @ChildPermission(name = "mythicdrops.command.debug"),
+        @ChildPermission(name = "mythicdrops.command.errors"),
+        @ChildPermission(name = "mythicdrops.command.toggledebug"),
+        @ChildPermission(name = "mythicdrops.command.drop.*"),
+        @ChildPermission(name = "mythicdrops.command.give.*"),
+        @ChildPermission(name = "mythicdrops.command.itemgroups"),
         @ChildPermission(name = "mythicdrops.command.modify.*"),
-        @ChildPermission(name = "mythicdrops.command.combiners.*"),
-        @ChildPermission(name = "mythicdrops.command.customcreate")
+        @ChildPermission(name = "mythicdrops.command.load"),
+        @ChildPermission(name = "mythicdrops.command.socketgems"),
+        @ChildPermission(name = "mythicdrops.command.spawn.*"),
+        @ChildPermission(name = "mythicdrops.command.tiers.*"),
       }),
   @Permission(
       name = "mythicdrops.*",
@@ -380,6 +418,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
   private Random random;
   private Handler logHandler;
   private JarConfigMigrator jarConfigMigrator;
+  private CustomEnchantmentRegistry customEnchantmentRegistry;
 
   public static DropBuilder getNewDropBuilder() {
     return new MythicDropBuilder(getInstance());
@@ -525,6 +564,12 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     return loadingErrorManager;
   }
 
+  @NotNull
+  @Override
+  public CustomEnchantmentRegistry getCustomEnchantmentRegistry() {
+    return customEnchantmentRegistry;
+  }
+
   @Override
   public void reloadSettings() {
     reloadStartupSettings();
@@ -662,9 +707,13 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
       CustomItem ci = MythicCustomItem.fromConfigurationSection(cs, key);
       if (ci.getMaterial() == Material.AIR) {
         LOGGER.fine(
-            String.format("Error when loading custom item (%s): materialName is not set", key));
+            String.format(
+                "Error when loading custom item (%s): material is equivalent to AIR: %s",
+                key, cs.get(String.format("%s.material", key))));
         loadingErrorManager.add(
-            String.format("Error when loading custom item (%s): materialName is not set", key));
+            String.format(
+                "Error when loading custom item (%s): material is equivalent to AIR: %s",
+                key, cs.get(String.format("%s.material", key))));
         continue;
       }
       customItemManager.add(ci);
@@ -865,15 +914,15 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
         LOGGER.info("tier == null, key=" + key);
         continue;
       }
-      if (tierManager.hasWithSameColors(tier.getDisplayColor(), tier.getDisplayColor())) {
-        LOGGER.info(
-            "Not loading "
-                + key
-                + " as there is already a tier with that display color and identifier color loaded");
-        loadingErrorManager.add(
+      Tier preExistingTier =
+          tierManager.getWithColors(tier.getDisplayColor(), tier.getIdentifierColor());
+      if (preExistingTier != null) {
+        String message =
             String.format(
-                "Not loading %s as there is already a tier with that display color and identifier color loaded",
-                key));
+                "Not loading %s as there is already a tier with that display color and identifier color loaded: %s",
+                key, preExistingTier.getName());
+        LOGGER.info(message);
+        loadingErrorManager.add(message);
         continue;
       }
       tierManager.add(tier);
@@ -910,7 +959,11 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
     }
     if (startAuraRunnable) {
       auraRunnable = new AuraRunnable(socketGemCacheManager);
-      auraTask = auraRunnable.runTaskTimer(this, 20L, 20L * 30);
+      auraTask =
+          auraRunnable.runTaskTimer(
+              this,
+              20L,
+              20L * settingsManager.getSocketingSettings().getOptions().getAuraRefreshInSeconds());
       getLogger()
           .info(
               "AuraRunnable enabled due to one or more gems detected as using AURA trigger type.");
@@ -973,6 +1026,9 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
       return;
     }
 
+    customEnchantmentRegistry = new MythicCustomEnchantmentRegistry(this);
+    customEnchantmentRegistry.registerEnchantments();
+
     jarConfigMigrator =
         new JarConfigMigrator(
             getFile(),
@@ -1016,8 +1072,12 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
 
     socketGemCombinerGuiFactory = new MythicSocketGemCombinerGuiFactory(this, settingsManager);
 
+    Bukkit.getPluginManager().registerEvents(new DebugListener(MythicDebugManager.INSTANCE), this);
     Bukkit.getPluginManager().registerEvents(new AnvilListener(settingsManager), this);
     Bukkit.getPluginManager().registerEvents(new CraftingListener(settingsManager), this);
+    if (MinecraftVersionUtil.INSTANCE.hasGrindstoneInventory()) {
+      Bukkit.getPluginManager().registerEvents(new GrindstoneListener(settingsManager), this);
+    }
 
     MythicDropsPluginExtensionsKt.setupCommands(this);
 
@@ -1034,14 +1094,15 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
           .registerEvents(new RepairingListener(repairItemManager, settingsManager), this);
     }
     if (settingsManager.getConfigSettings().getComponents().isSocketingEnabled()) {
-      getLogger().info("Socketting enabled");
-      LOGGER.info("Socketting enabled");
+      getLogger().info("Socketing enabled");
+      LOGGER.info("Socketing enabled");
       Bukkit.getPluginManager()
           .registerEvents(
               new SocketInventoryDragListener(itemGroupManager, settingsManager, socketGemManager),
               this);
       Bukkit.getPluginManager()
-          .registerEvents(new SocketEffectListener(socketGemCacheManager, settingsManager), this);
+          .registerEvents(
+              new SocketEffectListener(this, socketGemCacheManager, settingsManager), this);
       Bukkit.getPluginManager()
           .registerEvents(new SocketGemCacheListener(socketGemCacheManager), this);
       Bukkit.getPluginManager()
@@ -1059,6 +1120,7 @@ public final class MythicDropsPlugin extends JavaPlugin implements MythicDrops {
               this);
     }
 
+    PaperLib.suggestPaper(this);
     MythicDropsPluginExtensionsKt.setupMetrics(this);
     LOGGER.info("v" + getDescription().getVersion() + " enabled");
   }

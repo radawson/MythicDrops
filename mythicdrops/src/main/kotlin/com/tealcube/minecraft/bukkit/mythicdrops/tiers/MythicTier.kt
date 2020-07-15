@@ -22,6 +22,7 @@
 package com.tealcube.minecraft.bukkit.mythicdrops.tiers
 
 import com.squareup.moshi.JsonClass
+import com.tealcube.minecraft.bukkit.mythicdrops.api.attributes.MythicAttribute
 import com.tealcube.minecraft.bukkit.mythicdrops.api.enchantments.MythicEnchantment
 import com.tealcube.minecraft.bukkit.mythicdrops.api.errors.LoadingErrorManager
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.ItemGroup
@@ -68,7 +69,11 @@ data class MythicTier(
     override val chanceToHaveSockets: Double = 0.0,
     override val minimumSockets: Int = 0,
     override val maximumSockets: Int = 0,
-    override val isBroadcastOnFind: Boolean = false
+    override val isBroadcastOnFind: Boolean = false,
+    override val baseAttributes: Set<MythicAttribute> = emptySet(),
+    override val bonusAttributes: Set<MythicAttribute> = emptySet(),
+    override val minimumBonusAttributes: Int = 0,
+    override val maximumBonusAttributes: Int = 0
 ) : Tier {
     companion object {
         private val logger = JulLoggerFactory.getLogger(MythicTier::class)
@@ -130,39 +135,60 @@ data class MythicTier(
                 configurationSection.getStringList("item-types.disallowed-material-ids").mapNotNull {
                     Material.getMaterial(it)
                 }
+            val isAllowHighBaseEnchantments =
+                configurationSection.getBoolean("enchantments.allow-high-base-enchantments")
+            val isAllowHighBonusEnchantments =
+                configurationSection.getBoolean("enchantments.allow-high-bonus-enchantments")
+            val attributesSection = configurationSection.getOrCreateSection("attributes")
+            val baseAttributes = attributesSection.getOrCreateSection("base-attributes").let {
+                it.getKeys(false).mapNotNull { attrKey ->
+                    val attrCS = it.getOrCreateSection(attrKey)
+                    MythicAttribute.fromConfigurationSection(attrCS, attrKey)
+                }.toSet()
+            }
+            val bonusAttributes = attributesSection.getOrCreateSection("bonus-attributes").let {
+                it.getKeys(false).mapNotNull { attrKey ->
+                    val attrCS = it.getOrCreateSection(attrKey)
+                    MythicAttribute.fromConfigurationSection(attrCS, attrKey)
+                }.toSet()
+            }
             return MythicTier(
-                key,
-                configurationSection.getNonNullString("display-name", key),
-                displayColor,
-                identifierColor,
-                configurationSection.getStringList("lore.base-lore"),
-                configurationSection.getStringList("lore.bonus-lore"),
-                configurationSection.getInt("lore.minimum-bonus-lore"),
-                configurationSection.getInt("lore.maximum-bonus-lore"),
-                mythicBaseEnchantments.toSet(),
-                mythicBonusEnchantments.toSet(),
-                configurationSection.getInt("enchantments.minimum-bonus-enchantments"),
-                configurationSection.getInt("enchantments.maximum-bonus-enchantments"),
-                configurationSection.getBoolean("enchantments.safe-base-enchantments"),
-                configurationSection.getBoolean("enchantments.safe-bonus-enchantments"),
-                configurationSection.getBoolean("enchantments.allow-high-base-enchantments"),
-                configurationSection.getBoolean("enchantments.allow-high-bonus-enchantments"),
-                configurationSection.getDouble("minimum-durability"),
-                configurationSection.getDouble("maximum-durability"),
-                configurationSection.getDouble("chance-to-drop-on-monster-death"),
-                allowedItemGroups.toSet(),
-                disallowedItemGroups.toSet(),
-                allowedMaterialIds.toSet(),
-                disallowedMaterialIds.toSet(),
-                configurationSection.getInt("minimum-distance-from-spawn", -1),
-                configurationSection.getInt("maximum-distance-from-spawn", -1),
-                configurationSection.getBoolean("unbreakable"),
-                configurationSection.getDouble("weight"),
-                configurationSection.getDouble("identity-weight"),
-                configurationSection.getDouble("chance-to-have-sockets"),
-                configurationSection.getInt("minimum-sockets"),
-                configurationSection.getInt("maximum-sockets"),
-                configurationSection.getBoolean("broadcast-on-find")
+                name = key,
+                displayName = configurationSection.getNonNullString("display-name", key),
+                displayColor = displayColor,
+                identifierColor = identifierColor,
+                baseLore = configurationSection.getStringList("lore.base-lore"),
+                bonusLore = configurationSection.getStringList("lore.bonus-lore"),
+                minimumBonusLore = configurationSection.getInt("lore.minimum-bonus-lore"),
+                maximumBonusLore = configurationSection.getInt("lore.maximum-bonus-lore"),
+                baseEnchantments = mythicBaseEnchantments.toSet(),
+                bonusEnchantments = mythicBonusEnchantments.toSet(),
+                minimumBonusEnchantments = configurationSection.getInt("enchantments.minimum-bonus-enchantments"),
+                maximumBonusEnchantments = configurationSection.getInt("enchantments.maximum-bonus-enchantments"),
+                isSafeBaseEnchantments = configurationSection.getBoolean("enchantments.safe-base-enchantments"),
+                isSafeBonusEnchantments = configurationSection.getBoolean("enchantments.safe-bonus-enchantments"),
+                isAllowHighBaseEnchantments = isAllowHighBaseEnchantments,
+                isAllowHighBonusEnchantments = isAllowHighBonusEnchantments,
+                minimumDurabilityPercentage = configurationSection.getDouble("minimum-durability"),
+                maximumDurabilityPercentage = configurationSection.getDouble("maximum-durability"),
+                chanceToDropOnMonsterDeath = configurationSection.getDouble("chance-to-drop-on-monster-death"),
+                allowedItemGroups = allowedItemGroups.toSet(),
+                disallowedItemGroups = disallowedItemGroups.toSet(),
+                allowedMaterialIds = allowedMaterialIds.toSet(),
+                disallowedMaterialIds = disallowedMaterialIds.toSet(),
+                minimumDistanceFromSpawn = configurationSection.getInt("minimum-distance-from-spawn", -1),
+                maximumDistanceFromSpawn = configurationSection.getInt("maximum-distance-from-spawn", -1),
+                isUnbreakable = configurationSection.getBoolean("unbreakable"),
+                weight = configurationSection.getDouble("weight"),
+                identityWeight = configurationSection.getDouble("identity-weight"),
+                chanceToHaveSockets = configurationSection.getDouble("chance-to-have-sockets"),
+                minimumSockets = configurationSection.getInt("minimum-sockets"),
+                maximumSockets = configurationSection.getInt("maximum-sockets"),
+                isBroadcastOnFind = configurationSection.getBoolean("broadcast-on-find"),
+                baseAttributes = baseAttributes,
+                bonusAttributes = bonusAttributes,
+                minimumBonusAttributes = configurationSection.getInt("attributes.minimum-bonus-attributes"),
+                maximumBonusAttributes = configurationSection.getInt("attributes.maximum-bonus-attributes")
             )
         }
     }

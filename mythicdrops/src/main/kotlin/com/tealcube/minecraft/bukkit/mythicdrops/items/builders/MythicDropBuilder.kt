@@ -22,6 +22,7 @@
 package com.tealcube.minecraft.bukkit.mythicdrops.items.builders
 
 import com.google.common.base.Joiner
+import com.tealcube.minecraft.bukkit.mythicdrops.addAttributeModifier
 import com.tealcube.minecraft.bukkit.mythicdrops.api.MythicDrops
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.ItemGenerationReason
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.ItemGroup
@@ -126,8 +127,22 @@ class MythicDropBuilder(
 
         val baseEnchantments = ItemBuildingUtil.getBaseEnchantments(itemStack, chosenTier)
         val bonusEnchantments = ItemBuildingUtil.getBonusEnchantments(itemStack, chosenTier)
+        val baseAttributes = ItemBuildingUtil.getBaseAttributeModifiers(chosenTier)
+        val bonusAttributes = ItemBuildingUtil.getBonusAttributeModifiers(chosenTier)
 
         itemStack.addUnsafeEnchantments(baseEnchantments.merge(bonusEnchantments))
+        baseAttributes.forEach { attribute, attributeModifier ->
+            itemStack.addAttributeModifier(
+                attribute,
+                attributeModifier
+            )
+        }
+        bonusAttributes.forEach { attribute, attributeModifier ->
+            itemStack.addAttributeModifier(
+                attribute,
+                attributeModifier
+            )
+        }
 
         if (useDurability) {
             val minimumDurability = (chosenMat.maxDurability - (chosenMat.maxDurability * max(

@@ -22,15 +22,18 @@
 package com.tealcube.minecraft.bukkit.mythicdrops.utils
 
 import com.tealcube.minecraft.bukkit.mythicdrops.MythicDropsPlugin
+import com.tealcube.minecraft.bukkit.mythicdrops.api.enchantments.CustomEnchantmentRegistry
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.CustomItem
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.CustomItemManager
 import org.bukkit.inventory.ItemStack
 
 object CustomItemUtil {
+    private val customEnchantmentRegistry: CustomEnchantmentRegistry
+        get() = MythicDropsPlugin.getInstance().customEnchantmentRegistry
     private val customItemManager: CustomItemManager
         get() = MythicDropsPlugin.getInstance().customItemManager
 
     fun getCustomItemFromItemStack(itemStack: ItemStack): CustomItem? {
-        return customItemManager.get().find { it.toItemStack().isSimilar(itemStack) }
+        return customItemManager.get().find { it.toItemStack(customEnchantmentRegistry).isSimilar(itemStack) }
     }
 }

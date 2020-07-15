@@ -8,9 +8,12 @@
     <ID>ComplexMethod:MythicDropBuilder.kt$MythicDropBuilder$generateLore</ID>
     <ID>ComplexMethod:MythicDropBuilder.kt$MythicDropBuilder$generateName</ID>
     <ID>ComplexMethod:MythicDropsPluginExtensions.kt$registerContexts</ID>
+    <ID>ComplexMethod:SocketInventoryDragListener.kt$SocketInventoryDragListener$onInventoryClickEvent</ID>
     <ID>ForbiddenComment:ItemDroppingListener.kt$ItemDroppingListener$// TODO: set durability</ID>
+    <ID>LongMethod:IdentificationInventoryDragListener.kt$IdentificationInventoryDragListener$onInventoryClickEvent</ID>
     <ID>LongMethod:ItemDroppingListener.kt$ItemDroppingListener$handleEntityDeathEventWithoutGive</ID>
     <ID>LongMethod:ItemSpawningListener.kt$ItemSpawningListener$onCreatureSpawnEventLow</ID>
+    <ID>LongMethod:MythicDropBuilder.kt$MythicDropBuilder$build</ID>
     <ID>LongMethod:MythicDropBuilder.kt$MythicDropBuilder$generateLore</ID>
     <ID>LongMethod:MythicDropBuilder.kt$MythicDropBuilder$generateName</ID>
     <ID>LongMethod:MythicSocketGem.kt$MythicSocketGem.Companion$fromConfigurationSection</ID>
@@ -20,7 +23,9 @@
     <ID>LongParameterList:DropCommands.kt$DropCommands.NestedDropCommands$( sender: CommandSender, socketGem: SocketGem?, world: World, @Default("0") x: Int, @Default("0") y: Int, @Default("0") z: Int, @Conditions("limits:min=0") @Default("1") amount: Int )</ID>
     <ID>LongParameterList:DropCommands.kt$DropCommands.NestedDropCommands$( sender: CommandSender, tier: Tier?, world: World, @Default("0") x: Int, @Default("0") y: Int, @Default("0") z: Int, @Conditions("limits:min=0") @Default("1") amount: Int )</ID>
     <ID>LongParameterList:DropCommands.kt$DropCommands.NestedDropCommands$( sender: CommandSender, world: World, @Default("0") x: Int, @Default("0") y: Int, @Default("0") z: Int, @Conditions("limits:min=0") @Default("1") amount: Int )</ID>
+    <ID>LongParameterList:DropCommands.kt$DropCommands.NestedDropCommands$( sender: CommandSender, world: World, @Default("0") x: Int, @Default("0") y: Int, @Default("0") z: Int, @Conditions("limits:min=0") @Default("1") amount: Int, @Default("") @Split(",") allowableTiers: Array&lt;String&gt; )</ID>
     <ID>LongParameterList:IdentifyingUtil.kt$IdentifyingUtil$( creatureSpawningSettings: CreatureSpawningSettings, tierManager: TierManager, allowableTiers: Collection&lt;Tier&gt;?, droppedBy: EntityType?, tiersFromMaterial: Collection&lt;Tier&gt;, potentialTierFromLastLoreLine: Tier? )</ID>
+    <ID>LongParameterList:UnidentifiedItem.kt$UnidentifiedItem$( material: Material, unidentifiedItemOptions: UnidentifiedItemOptions, displayNames: Map&lt;String, String&gt;, allowableTiers: Collection&lt;Tier&gt; = emptyList(), droppedBy: EntityType? = null, tier: Tier? = null, amount: Int = 1, durability: Short = 0 )</ID>
     <ID>LongParameterList:UnidentifiedItem.kt$UnidentifiedItem.Companion$( creatureSpawningSettings: CreatureSpawningSettings, displayNames: Map&lt;String, String&gt;, material: Material, tierManager: TierManager, unidentifiedItemOptions: UnidentifiedItemOptions, droppedBy: EntityType? = null, tier: Tier? = null )</ID>
     <ID>LoopWithTooManyJumpStatements:InventoryExtensions.kt$while (true) { val firstSlot = firstSlot(material, itemName, itemLore, itemEnchantments) // Drat! we don't have this type in the inventory if (firstSlot == -1) { break } val itemAtFirstSlot = getItem(firstSlot) ?: break val amountAtFirstSlot = itemAtFirstSlot.amount if (amountAtFirstSlot &lt;= toDelete) { toDelete -= amountAtFirstSlot clear(firstSlot) } else { itemAtFirstSlot.amount = (amountAtFirstSlot - toDelete) setItem(firstSlot, itemAtFirstSlot) toDelete = 0 } // Bail when done if (toDelete &lt;= 0) { break } }</ID>
     <ID>MagicNumber:CombinerCommands.kt$CombinerCommands.NestedCombinerCommands$10</ID>
@@ -49,7 +54,6 @@
     <ID>MagicNumber:SocketCommand.kt$SocketCommand$6</ID>
     <ID>MagicNumber:SocketParticleEffect.kt$SocketParticleEffect$10</ID>
     <ID>MagicNumber:SocketParticleEffect.kt$SocketParticleEffect$10L</ID>
-    <ID>MaxLineLength:CustomCreateCommand.kt$CustomCreateCommand$sender.sendMythicMessage(mythicDrops.settingsManager.languageSettings.command.customCreate.success, "%name%" to name)</ID>
     <ID>MaxLineLength:InventoryClickEventExtensions.kt$logger.fine("eventCurrentItem.type == Material.AIR || eventCursor.type == Material.AIR || event.click != ClickType.RIGHT")</ID>
     <ID>MaxLineLength:InventoryClickEventExtensions.kt$logger.fine("eventCurrentItem.type=${eventCurrentItem.type} eventCursor.type=${eventCursor.type} event.click=$click")</ID>
     <ID>MaxLineLength:ListExtensions.kt$fun List&lt;String&gt;.replaceWithCollections(elementAndCollectionPairs: Collection&lt;Pair&lt;String, Collection&lt;String&gt;&gt;&gt;): List&lt;String&gt;</ID>
@@ -85,7 +89,6 @@
     <ID>MaxLineLength:SocketInventoryDragListener.kt$SocketInventoryDragListener$if (socketGem.anyOfItemGroups.isEmpty() &amp;&amp; socketGem.noneOfItemGroups.isEmpty() &amp;&amp; !matchingItemGroups.containsAll( socketGem.itemGroups ) ) { logger.fine("!itemGroupManager.getMatchingItemGroups(targetItem.type).containsAll(socketGem.itemGroups)") player.sendMessage(settingsManager.languageSettings.socketing.notInItemGroup.chatColorize()) return }</ID>
     <ID>MaxLineLength:SocketInventoryDragListener.kt$SocketInventoryDragListener$val allOfMatch = socketGem.allOfItemGroups.isEmpty() || matchingItemGroups.containsAll(socketGem.allOfItemGroups)</ID>
     <ID>MaxLineLength:SocketInventoryDragListener.kt$SocketInventoryDragListener$val anyOfMatch = socketGem.anyOfItemGroups.isEmpty() || matchingItemGroups.any { socketGem.anyOfItemGroups.contains(it) }</ID>
-    <ID>MaxLineLength:SpawnCommands.kt$SpawnCommands.NestedSpawnCommands$@Subcommand("tier") @CommandCompletion("@tiers *") @Description("Spawns a tiered item in the player's inventory. Use \"*\" to spawn any tier.") @CommandPermission("mythicdrops.command.spawn.tier") fun spawnTierCommand(sender: Player, @Default("*") tier: Tier?, @Conditions("limits:min=0") @Default("1") amount: Int)</ID>
     <ID>MaxLineLength:UnidentifiedItem.kt$UnidentifiedItem$"${unidentifiedItemOptions.allowableTiersPrefix}$allowableTiersJoined${unidentifiedItemOptions.allowableTiersSuffix}"</ID>
     <ID>MemberNameEqualsClassName:CustomItemsCommand.kt$CustomItemsCommand$@Description("Prints the custom items that the plugin is aware of.") @Subcommand("customitems") @CommandPermission("mythicdrops.command.customitems") fun customItemsCommand(sender: CommandSender)</ID>
     <ID>MemberNameEqualsClassName:DebugCommand.kt$DebugCommand$@Description("Prints information to log. Useful for getting help in the Discord.") @Subcommand("debug") @CommandPermission("mythicdrops.command.debug") fun debugCommand(sender: CommandSender)</ID>
@@ -93,6 +96,7 @@
     <ID>MemberNameEqualsClassName:SocketGemsCommand.kt$SocketGemsCommand$@Description("Prints the socket gems that the plugin is aware of.") @Subcommand("socketgems") @CommandPermission("mythicdrops.command.socketgems") fun socketGemsCommand(sender: CommandSender)</ID>
     <ID>MemberNameEqualsClassName:TiersCommand.kt$TiersCommand$@Description("Prints the tiers that the plugin is aware of.") @Subcommand("tiers") @CommandPermission("mythicdrops.command.tiers") fun tiersCommand(sender: CommandSender)</ID>
     <ID>NestedBlockDepth:AuraRunnable.kt$AuraRunnable$run</ID>
+    <ID>NestedBlockDepth:SocketEffectListener.kt$SocketEffectListener$applyEffectsDuringEntityDamageByEntityEvent</ID>
     <ID>NestedBlockDepth:SocketPotionEffect.kt$SocketPotionEffect$apply</ID>
     <ID>ReturnCount:AnvilListener.kt$AnvilListener$@EventHandler(priority = EventPriority.MONITOR) fun onItemRename(e: InventoryClickEvent)</ID>
     <ID>ReturnCount:CustomCreateCommand.kt$CustomCreateCommand$@Description("Creates a new custom item based on the item in your main hand.") @Subcommand("customcreate") @CommandPermission("mythicdrops.command.customcreate") fun customItemsCommand(sender: Player, @Default("0") weight: Double)</ID>
@@ -100,6 +104,7 @@
     <ID>ReturnCount:IdentificationInventoryDragListener.kt$IdentificationInventoryDragListener$@EventHandler(priority = EventPriority.LOWEST) fun onInventoryClickEvent(event: InventoryClickEvent)</ID>
     <ID>ReturnCount:InventoryClickEventExtensions.kt$fun InventoryClickEvent.getTargetItemAndCursorAndPlayer(logger: Logger): Triple&lt;ItemStack, ItemStack, Player&gt;?</ID>
     <ID>ReturnCount:InventoryExtensions.kt$fun Inventory.containsAtLeast( material: Material, itemName: String? = null, itemLore: List&lt;String&gt;? = null, itemEnchantments: Map&lt;Enchantment, Int&gt;? = null, amount: Int = 1 ): Boolean</ID>
+    <ID>ReturnCount:MythicAttribute.kt$MythicAttribute.Companion$@JvmStatic fun fromConfigurationSection(configurationSection: ConfigurationSection, key: String): MythicAttribute?</ID>
     <ID>ReturnCount:MythicDropBuilder.kt$MythicDropBuilder$override fun build(): ItemStack?</ID>
     <ID>ReturnCount:MythicSettingsInterfaceJsonAdapterFactory.kt$MythicSettingsInterfaceJsonAdapterFactory$override fun create(type: Type, annotations: MutableSet&lt;out Annotation&gt;, moshi: Moshi): JsonAdapter&lt;*&gt;?</ID>
     <ID>ReturnCount:MythicSocketGem.kt$MythicSocketGem.Companion$private fun buildSocketParticleEffects(configurationSection: ConfigurationSection): List&lt;SocketParticleEffect&gt;</ID>
@@ -121,12 +126,12 @@
     <ID>ReturnCount:TierUtil.kt$TierUtil$@JvmStatic fun getTierFromItemStack(itemStack: ItemStack, tiers: Collection&lt;Tier&gt;): Tier?</ID>
     <ID>SpreadOperator:CommandSenderExtensions.kt$(*args)</ID>
     <ID>SpreadOperator:ListExtensions.kt$(*args)</ID>
-    <ID>ThrowsCount:DropCommands.kt$DropCommands.NestedDropCommands$@Subcommand("unidentified") @Description("Spawns an Unidentified Item in the player's inventory.") @CommandCompletion("@worlds * * * *") @CommandPermission("mythicdrops.command.drop.unidentified") fun dropUnidentifiedItem( sender: CommandSender, world: World, @Default("0") x: Int, @Default("0") y: Int, @Default("0") z: Int, @Conditions("limits:min=0") @Default("1") amount: Int )</ID>
     <ID>ThrowsCount:MythicDropsPluginExtensions.kt$private fun MythicDropsPlugin.registerContexts(commandManager: PaperCommandManager)</ID>
-    <ID>ThrowsCount:SpawnCommands.kt$SpawnCommands.NestedSpawnCommands$@Subcommand("unidentified") @Description("Spawns an Unidentified Item in the player's inventory.") @CommandPermission("mythicdrops.command.spawn.unidentified") fun spawnUnidentifiedItem(sender: Player, @Conditions("limits:min=0") @Default("1") amount: Int)</ID>
+    <ID>ThrowsCount:SpawnCommands.kt$SpawnCommands.NestedSpawnCommands$@Subcommand("unidentified") @Description("Spawns an Unidentified Item in the player's inventory.") @CommandPermission("mythicdrops.command.spawn.unidentified") fun spawnUnidentifiedItem( sender: Player, @Conditions("limits:min=0") @Default("1") amount: Int, @Default("") @Split(",") allowableTiers: Array&lt;String&gt; )</ID>
     <ID>TooGenericExceptionCaught:ChatColorUtil.kt$ChatColorUtil$e: Exception</ID>
     <ID>TooGenericExceptionCaught:CustomCreateCommand.kt$CustomCreateCommand$throwable: Throwable</ID>
     <ID>TooGenericExceptionCaught:EnchantmentUtil.kt$EnchantmentUtil$ex: Throwable</ID>
+    <ID>TooGenericExceptionCaught:MythicAttribute.kt$MythicAttribute.Companion$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MythicCustomItem.kt$MythicCustomItem$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:MythicDropBuilder.kt$MythicDropBuilder$throwable: Throwable</ID>
     <ID>TooGenericExceptionCaught:MythicDropsPluginExtensions.kt$ex: Exception</ID>
@@ -134,6 +139,7 @@
     <ID>TooGenericExceptionCaught:MythicSettingsInterfaceJsonAdapterFactory.kt$MythicSettingsInterfaceJsonAdapterFactory$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:SocketParticleEffect.kt$SocketParticleEffect.Companion$ex: Exception</ID>
     <ID>TooManyFunctions:GemUtil.kt$GemUtil$GemUtil</ID>
+    <ID>TooManyFunctions:ItemStackExtensions.kt$com.tealcube.minecraft.bukkit.mythicdrops.ItemStackExtensions.kt</ID>
     <ID>TooManyFunctions:ListExtensions.kt$com.tealcube.minecraft.bukkit.mythicdrops.ListExtensions.kt</ID>
     <ID>TooManyFunctions:MythicDropBuilder.kt$MythicDropBuilder$MythicDropBuilder</ID>
     <ID>TooManyFunctions:MythicDrops.kt$MythicDrops$MythicDrops</ID>

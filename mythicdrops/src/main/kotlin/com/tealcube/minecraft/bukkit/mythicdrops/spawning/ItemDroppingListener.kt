@@ -45,23 +45,16 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.inventory.EntityEquipment
 import org.bukkit.inventory.ItemStack
 
 class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
     companion object {
         private val logger = JulLoggerFactory.getLogger(ItemDroppingListener::class)
-        private const val ZERO = 0
-        private const val ONE = 1
-        private const val TWO = 2
-        private const val THREE = 3
-        private const val FOUR = 4
-        private const val FIVE = 5
     }
 
     @EventHandler
     fun onEntityDeathEvent(event: EntityDeathEvent) {
-        if (isShouldCancelDrops(event)) return
+        if (shouldNotHandleDeathEvent(event)) return
 
         if (mythicDrops.settingsManager.configSettings.options.isDisplayMobEquipment) {
             handleEntityDeathEventWithGive(event)
@@ -78,12 +71,6 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
             val idxOfItemInDrops = event.drops.indexOf(item)
 
             if (idxOfItemInDrops == -1) {
-                return@forEachIndexed
-            }
-
-            val dropChanceForSlot = getDropChanceForEquipmentSlot(idx, entityEquipment)
-
-            if (dropChanceForSlot > 1.0F) {
                 return@forEachIndexed
             }
 
@@ -122,16 +109,6 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
         }
     }
 
-    private fun getDropChanceForEquipmentSlot(slot: Int, entityEquipment: EntityEquipment): Float = when (slot) {
-        ZERO -> entityEquipment.helmetDropChance
-        ONE -> entityEquipment.chestplateDropChance
-        TWO -> entityEquipment.leggingsDropChance
-        THREE -> entityEquipment.bootsDropChance
-        FOUR -> entityEquipment.itemInMainHandDropChance
-        FIVE -> entityEquipment.itemInOffHandDropChance
-        else -> 0.0F
-    }
-
     private fun handleEntityDeathEventWithoutGive(event: EntityDeathEvent) {
         val itemChance = mythicDrops.settingsManager.configSettings.drops.itemChance
         val creatureSpawningMultiplier = mythicDrops
@@ -162,6 +139,7 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
 
         val tieredItemChanceMultiplied = tieredItemChance * creatureSpawningMultiplier
 
+        var broadcast = false
         var itemStack: ItemStack? = null
         var dropChance = 1.0
 
@@ -178,6 +156,7 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
                 itemStack = MythicDropBuilder(mythicDrops).withItemGenerationReason(ItemGenerationReason.MONSTER_SPAWN)
                     .useDurability(false).withTier(it).build()
                 dropChance = it.chanceToDropOnMonsterDeath
+                broadcast = it.isBroadcastOnFind
             }
         } else if (customItemRoll < customItemChance && WorldGuardAdapters.instance.isFlagAllowAtLocation(
                 event.entity.location,
@@ -186,11 +165,12 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
         ) {
             mythicDrops.customItemManager.randomByWeight()?.let {
                 val customItemGenerationEvent =
-                    CustomItemGenerationEvent(it)
+                    CustomItemGenerationEvent(it, it.toItemStack(mythicDrops.customEnchantmentRegistry))
                 Bukkit.getPluginManager().callEvent(customItemGenerationEvent)
                 if (!customItemGenerationEvent.isCancelled) {
                     itemStack = customItemGenerationEvent.result
                     dropChance = it.chanceToDropOnDeath
+                    broadcast = it.isBroadcastOnFind
                 }
             }
         } else if (socketingEnabled && socketGemRoll <= socketGemChance &&
@@ -237,11 +217,18 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
         itemStack?.let {
             if (it.amount > 0 && !isAir(it.type) && RandomUtils.nextDouble(0.0, 1.0) <= dropChance) {
                 event.drops.add(it)
+                if (broadcast) {
+                    broadcastItem(
+                        mythicDrops.settingsManager.languageSettings,
+                        event.entity.killer,
+                        it
+                    )
+                }
             }
         }
     }
 
-    private fun isShouldCancelDrops(event: EntityDeathEvent): Boolean {
+    private fun shouldNotHandleDeathEvent(event: EntityDeathEvent): Boolean {
         return when {
             event.entity is Player -> true
             event.entity.lastDamageCause == null -> true
@@ -252,13 +239,14 @@ class ItemDroppingListener(private val mythicDrops: MythicDrops) : Listener {
                 .multiworld
                 .enabledWorlds
                 .contains(event.entity.world.name) -> true
-            mythicDrops
-                .settingsManager
-                .configSettings
-                .options
-                .isRequirePlayerKillForDrops
-                && event.entity.killer == null -> true
+            requirePlayerKillForDrops(event) -> true
             else -> false
         }
+    }
+
+    private fun requirePlayerKillForDrops(event: EntityDeathEvent): Boolean {
+        return !mythicDrops.settingsManager.configSettings.options.isDisplayMobEquipment &&
+            mythicDrops.settingsManager.configSettings.options.isRequirePlayerKillForDrops &&
+            event.entity.killer == null
     }
 }

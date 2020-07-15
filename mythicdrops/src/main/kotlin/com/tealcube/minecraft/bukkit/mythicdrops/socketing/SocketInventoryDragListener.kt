@@ -21,6 +21,7 @@
  */
 package com.tealcube.minecraft.bukkit.mythicdrops.socketing
 
+import com.tealcube.minecraft.bukkit.mythicdrops.addAttributeModifier
 import com.tealcube.minecraft.bukkit.mythicdrops.api.items.ItemGroupManager
 import com.tealcube.minecraft.bukkit.mythicdrops.api.settings.SettingsManager
 import com.tealcube.minecraft.bukkit.mythicdrops.api.socketing.SocketGem
@@ -141,6 +142,10 @@ class SocketInventoryDragListener(
         targetItem.setDisplayName(manipulatedTargetItemDisplayName)
         targetItem.setLore(manipulatedTargetItemLore)
         targetItem.setUnsafeEnchantments(manipulatedTargetItemEnchantments)
+        socketGem.attributes.forEach {
+            val (attribute, attributeModifier) = it.toAttributeModifier()
+            targetItem.addAttributeModifier(attribute, attributeModifier)
+        }
 
         event.updateCurrentItemAndSubtractFromCursor(targetItem)
         player.sendMessage(settingsManager.languageSettings.socketing.success.chatColorize())
@@ -163,7 +168,7 @@ class SocketInventoryDragListener(
             }
         // replace the open socket with the Socket Gem name followed by the socket gem lore
         return previousLore.toMutableList().apply {
-            set(indexOfFirstSocket, "$chatColorForSocketGemName${socketGem.name}")
+            set(indexOfFirstSocket, "$chatColorForSocketGemName${socketGem.name.chatColorize()}")
             addAll(indexOfFirstSocket + 1, socketGem.lore.chatColorize())
         }.toList()
     }

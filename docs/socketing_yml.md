@@ -14,16 +14,16 @@ MythicDrops has a lot of configuration options. Below is the contents of the
 socketing.yml with inline explanations of what each configuration option does.
 
 <Tabs
-defaultValue="5.2.0"
+defaultValue="5.3.0"
 values={[
-{ label: '5.2.0 (MD 6.1.x)', value: '5.2.0', },
-{ label: '5.1.0 (MD 6.0.1+)', value: '5.1.0', }
+{ label: '5.3.0 (MD 6.1.x)', value: '5.3.0', },
+{ label: '5.1.0 (MD 6.0.x)', value: '5.1.0', }
 ]
 }>
-<TabItem value="5.2.0">
+<TabItem value="5.3.0">
 
 ```yaml
-version: 5.2.0
+version: 5.3.0
 options:
   ## Should gems be prevented from being used in crafting? true is a recommended default.
   prevent-crafting-with-gems: true
@@ -49,6 +49,9 @@ options:
   ## Should socket gem names on items attempt to use the display color
   ## from a tier before falling back to default-socket-name-color-on-items?
   use-tier-color-for-socket-name: true
+  ## Sets the number of seconds between AURA gem refreshes. This is intentionally set
+  ## high as aura gems can be very computationally expensive due to distance checking.
+  aura-gem-refresh-in-seconds: 30
 items:
   socketed-item:
     ## Text to display for an open socket.

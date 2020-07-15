@@ -34,8 +34,18 @@ interface GeneralOptions {
     val isCanMobsPickUpEquipment: Boolean
     val blankMobSpawn: BlankMobSpawn
     val isAllowItemsToBeRepairedByAnvil: Boolean
+    val isAllowItemsToHaveRepairCostRemovedByGrindstone: Boolean
     val isRandomizeLeatherColors: Boolean
+
+    @Deprecated(
+        "Not used anywhere",
+        ReplaceWith(
+            "defaultSocketGemColorOnItems",
+            "com.tealcube.minecraft.bukkit.mythicdrops.api.settings.socketing.SocketingOptions"
+        )
+    )
     val defaultSocketGemColorOnItems: ChatColor
+
     @Deprecated(
         "Not used anywhere",
         ReplaceWith(
@@ -46,4 +56,5 @@ interface GeneralOptions {
     val isUseTierColorForSocketName: Boolean
     val isRequirePlayerKillForDrops: Boolean
     val isOnlyRollBonusEnchantmentsOnce: Boolean
+    val isOnlyRollBonusAttributesOnce: Boolean
 }
